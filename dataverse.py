@@ -97,7 +97,7 @@ if len(paths) == 1:
                     args.repo),
                 })
             resp = api.upload_datafile(
-                args.doi, join(relpath(root, path),f), df.json())
+                args.doi, join(root,f), df.json())
             check_dataset_lock(5)
 else:
     for path in paths:
