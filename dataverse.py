@@ -1,6 +1,6 @@
 import argparse
 from time import sleep
-from os.path import join
+from os.path import join, relpath
 from os import walk
 import requests
 from pyDataverse.api import NativeApi
@@ -79,6 +79,27 @@ if __name__ == '__main__':
         paths = [join('repo', d) for d in dirs]
 
     # the following adds all files from the repository to Dataverse
+if len(paths) == 1:
+    path = paths[0]
+    for root, subdirs, files in walk(path):
+        if '.git' in subdirs:
+            subdirs.remove('.git')
+        if '.github' in subdirs:
+            subdirs.remove('.github')
+        for f in files:
+            df = Datafile()
+            df.set({
+                "pid" : args.doi,
+                "filename" : f,
+                "directoryLabel": relpath(root, path),
+                "description" : \
+                  "Uploaded with GitHub Action from {}.".format(
+                    args.repo),
+                })
+            resp = api.upload_datafile(
+                args.doi, join(relpath(root, path),f), df.json())
+            check_dataset_lock(5)
+else:
     for path in paths:
         for root, subdirs, files in walk(path):
             if '.git' in subdirs:
